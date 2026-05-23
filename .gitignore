@@ -1,0 +1,19 @@
+# Dataset
+data/
+
+# Imágenes
+*.jpg
+*.png
+
+# Modelos
+*.h5
+*.pt
+*.pth
+
+# Jupyter y Python
+.ipynb_checkpoints/
+__pycache__/
+*.pyc
+
+# Entornos
+venv/

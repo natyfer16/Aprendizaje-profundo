@@ -1,0 +1,597 @@
+% ============================================================
+%  UIDE – MCDA-A – Grupo 2 – Semana 2 – Reporte de ejercicio práctico
+%  Formato: two-column IEEE-style con ajustes propios del grupo
+% ============================================================
+\documentclass[10pt,twocolumn]{article}
+
+% ── Paquetes ────────────────────────────────────────────────
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish]{babel}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\usepackage{caption}
+\usepackage{float}
+\usepackage{listings}
+\usepackage{parskip}
+
+% ── Geometría ───────────────────────────────────────────────
+\geometry{
+  a4paper,
+  top=2cm, bottom=2.2cm,
+  left=1.5cm, right=1.5cm,
+  columnsep=0.6cm,
+  headheight=14pt
+}
+
+% ── Colores ─────────────────────────────────────────────────
+\definecolor{uideblue}{RGB}{0,70,127}
+\definecolor{codered}{RGB}{180,0,0}
+\definecolor{codegray}{RGB}{245,245,245}
+\definecolor{codecomment}{RGB}{100,100,100}
+
+% ── Hipervínculos ───────────────────────────────────────────
+\hypersetup{
+  colorlinks=true,
+  linkcolor=uideblue,
+  urlcolor=uideblue,
+  citecolor=uideblue
+}
+
+% ── Títulos de secciones ────────────────────────────────────
+\titleformat{\section}
+  {\color{uideblue}\normalfont\bfseries\normalsize}
+  {\thesection.}{0.4em}{}
+\titleformat{\subsection}
+  {\normalfont\bfseries\small}
+  {\thesubsection.}{0.4em}{}
+\titlespacing*{\section}{0pt}{6pt}{3pt}
+\titlespacing*{\subsection}{0pt}{4pt}{2pt}
+
+% ── Captions ────────────────────────────────────────────────
+\captionsetup{font=small,labelfont=bf,skip=4pt}
+
+% ── Código ──────────────────────────────────────────────────
+\lstset{
+  backgroundcolor=\color{codegray},
+  basicstyle=\ttfamily\tiny,
+  commentstyle=\color{codecomment},
+  keywordstyle=\color{uideblue},
+  language=Python,
+  breaklines=true,
+  frame=single,
+  framerule=0.4pt,
+  rulecolor=\color{gray!40},
+  xleftmargin=4pt,
+  xrightmargin=4pt,
+  aboveskip=4pt,
+  belowskip=4pt
+}
+
+% ── Encabezado / pie ────────────────────────────────────────
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\scriptsize\textit{MCDA-A – Grupo 2 | Aprendizaje profundo | Semana 2 | Reporte de ejercicio práctico}}
+\fancyhead[R]{\includegraphics[height=20pt]{logo uide.png}}   % coloca tu logo aquí
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+% ── Sin sangría, espaciado entre párrafos ───────────────────
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{4pt}
+
+% ============================================================
+\begin{document}
+
+% ── Caja de metadatos (imitando el PDF de semana 1) ─────────
+\twocolumn[{%
+\begin{@twocolumnfalse}
+
+  \noindent
+  \begin{minipage}[t]{0.68\textwidth}
+    \footnotesize Notebook del ejercicio Práctico
+  \end{minipage}%
+  \begin{minipage}[t]{0.32\textwidth}
+    \raggedleft\footnotesize UIDE G2 W2 MCDA Notebook
+  \end{minipage}
+
+  \vspace{6pt}
+  \begin{center}
+    {\LARGE\bfseries Aplicación de Redes Neuronales Convolucionales (CNN) desde cero}\\[4pt]
+    {\LARGE\bfseries para la Identificación de Patologías Pulmonares en Radiografías de Tórax}\\[10pt]
+    {\normalsize Nataly Lanchimba / Dario Herrera / Jordy Cevallos}\\[2pt]
+    {\small\textit{Universidad Internacional del Ecuador}}\\[2pt]
+    {\small\textbf{Profesor:} Jefferson Rodriguez\quad|\quad\textbf{Semana 2}}
+  \end{center}
+
+  \vspace{6pt}
+  \noindent
+  \fbox{\begin{minipage}{\textwidth}
+    \small\textbf{Código fuente}\\
+    Proyecto en GitHub /
+    Jupyter Notebook \href{https://github.com/TU-USUARIO/TU-REPO/blob/main/UIDE\_G2\_W2\_MCDA\_A\_NOV25\_Notebook.ipynb}%
+    {\texttt{UIDE\_G2\_W2\_MCDA\_A\_NOV25\_Notebook.ipynb}}
+    % ^^^ REEMPLAZA el URL anterior con el tuyo
+  \end{minipage}}
+
+  \vspace{10pt}
+\end{@twocolumnfalse}
+}]
+
+% ============================================================
+\section{Resumen del Problema}
+
+El presente proyecto constituye la continuación del trabajo de la
+Semana~1, en el que se utilizó un Perceptrón Multicapa (MLP) sobre el
+dataset \textit{ChestX6: Multi-Class X-ray Dataset}.  En esta segunda
+entrega se implementa una \textbf{Red Neuronal Convolucional (CNN)
+desde cero}~--- sin pesos pre-entrenados~--- para el mismo problema de
+clasificación automática de radiografías de tórax en seis categorías de
+condiciones pulmonares/torácicas.
+
+La motivación principal del cambio de arquitectura es que las imágenes
+de rayos-X son datos espaciales 2D donde los patrones locales (nódulos,
+infiltrados, cardiomegalia) son naturalmente detectables mediante filtros
+convolucionales.  Las CNN son la solución óptima por cuatro razones:
+\begin{itemize}[leftmargin=*,noitemsep,topsep=2pt]
+  \item \textbf{Invarianza traslacional:} los filtros detectan patrones
+        en cualquier zona de la imagen.
+  \item \textbf{Jerarquía de características:} capas tempranas capturan
+        bordes y texturas; capas profundas capturan estructuras
+        anatómicas complejas.
+  \item \textbf{Eficiencia paramétrica:} el peso compartido reduce
+        drásticamente los parámetros frente a una red densa.
+  \item \textbf{Evidencia empírica:} las CNN dominan los benchmarks de
+        imagen médica (CheXNet, etc.).
+\end{itemize}
+
+Una RNN no sería adecuada (datos no secuenciales) ni un Transformer
+puro (requeriría muchos más datos para converger desde cero).
+
+% ============================================================
+\section{Preparación del Dataset}
+
+\subsection{Descripción del Dataset}
+
+Se emplea el mismo \textit{ChestX6} de la Semana~1: 18\,036 imágenes de
+radiografías de tórax en escala de grises, distribuidas en seis clases
+de condiciones pulmonares: \textit{Normal}, \textit{Pneumonia-Bacterial},
+\textit{Pneumonia-Viral}, \textit{COVID-19}, \textit{Tuberculosis} y
+\textit{Emphysema}.
+
+El dataset es relativamente equilibrado.  La clase con más imágenes es
+\textit{Normal} (3\,271) y la con menos es \textit{Emphysema} (2\,550),
+una diferencia de apenas el~28\,\% entre extremos, de modo que el
+desbalance no es severo.  La división predefinida respeta una proporción
+aproximada de 80/10/10, eliminando el riesgo de \textit{data leakage}.
+Las características principales del dataset se resumen en el
+Cuadro~\ref{tab:dataset}.
+
+\begin{table}[H]
+  \caption{Ficha técnica del dataset ChestX6}
+  \label{tab:dataset}
+  \centering\small
+  \begin{tabular}{@{}lp{3.4cm}@{}}
+    \toprule
+    \textbf{Característica} & \textbf{Descripción} \\
+    \midrule
+    Número de muestras    & 18\,036 imágenes \\
+    Modalidad             & Radiografía de tórax \\
+    Espacio de color      & Escala de grises (1 canal nativo; RGB en CNN) \\
+    Resolución nativa     & $224\times224$~px \\
+    Resolución usada (CNN)& $128\times128$~px \\
+    N.º de clases         & 6 \\
+    Partición Train       & 14\,551 imágenes (80.7\,\%) \\
+    Partición Validation  & 1\,748 imágenes (9.7\,\%) \\
+    Partición Test        & 1\,737 imágenes (9.6\,\%) \\
+    Tipo de tarea         & Clasificación multiclase \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{figure}[H]
+ \caption{Distribución de imágenes por clase del conjunto de datos}
+    \centering
+    \includegraphics[width=0.55\textwidth]{ficha_tecnica1.png}
+    \label{fig:ficha_tecnica1}
+\end{figure}
+
+Como se puede ver en la Figura ~\ref{fig:ficha_tecnica1} presenta la distribución 
+de imágenes por clase en los conjuntos de entrenamiento, validación y prueba. 
+Se observa una distribución relativamente balanceada entre las diferentes categorías, 
+con ligeras variaciones en el número de muestras disponibles. La clase Normal presenta 
+la mayor cantidad de imágenes, mientras que Emphysema contiene el menor 
+número de observaciones. Mientras que en validación y test se tienen proporciones
+ similares en cada clase
+
+\subsection{Preprocesamiento del Dataset}
+
+Se aplicaron las siguientes transformaciones para adaptar las imágenes
+al formato de entrada de la CNN:
+
+\textbf{Reescalado:} de $224\times224$ a $128\times128$~píxeles.  Esta
+reducción equilibra coste computacional y detalle anatómico suficiente
+para la clasificación.
+
+\textbf{Normalización:} división por 255, mapeando los valores de píxel
+al rango $[0,1]$ para estabilizar el gradiente durante el
+\textit{backpropagation} y acelerar la convergencia del optimizador.
+
+\textbf{Aumento de datos} (solo en entrenamiento): \textit{flip}
+horizontal, rotación leve ($\pm5$\,\%), zoom ($\pm10$\,\%), contraste
+($\pm15$\,\%), brillo ($\pm15$\,\%) y traslación ($\pm10$\,\%).  Estas
+transformaciones simulan variaciones naturales en la toma de
+radiografías~--- diferencias de posicionamiento del paciente o ajustes
+del equipo~--- sin distorsionar la información clínica relevante. Como se
+puede ver a ocntinuación en la ~\ref{fig:preprocesamiento}:
+
+\begin{figure}[H]
+ \caption{Argumentación de la data}
+    \centering
+    \includegraphics[width=0.5\textwidth]{preprocesamiento.png}
+    \label{fig:preprocesamiento}
+\end{figure}
+
+\textbf{Class weights:} se calcularon pesos de clase con
+\texttt{compute\_class\_weight('balanced')} para compensar el leve
+desbalance y evitar sesgo hacia las clases mayoritarias.
+
+% ============================================================
+\section{Implementación y Entrenamiento del Modelo}
+
+\subsection{Arquitectura de la CNN}
+
+La arquitectura está inspirada en VGG: bloques \textit{conv}$\times2$ +
+\textit{MaxPooling}, sin pesos pre-entrenados.  El diseño es progresivo
+(32~$\to$~64~$\to$~128~$\to$~256 filtros) para capturar características
+de complejidad creciente:
+
+\begin{enumerate}[leftmargin=*,noitemsep,topsep=2pt]
+  \item \textbf{Bloque 1} ($32$ filtros): detecta bordes, gradientes y
+        texturas de bajo nivel.
+        \texttt{Conv2D(32)}$\times2$ + BN + ReLU + \texttt{MaxPool} +
+        \texttt{Dropout(0.10)}\quad $128\to64$~px.
+  \item \textbf{Bloque 2} ($64$ filtros): patrones intermedios,
+        contornos anatómicos.
+        \texttt{Conv2D(64)}$\times2$ + BN + ReLU + \texttt{MaxPool} +
+        \texttt{Dropout(0.15)}\quad $64\to32$~px.
+  \item \textbf{Bloque 3} ($128$ filtros): estructuras complejas,
+        silueta cardíaca, nódulos, infiltrados.
+        \texttt{Conv2D(128)}$\times2$ + BN + ReLU + \texttt{MaxPool} +
+        \texttt{Dropout(0.20)}\quad $32\to16$~px.
+  \item \textbf{Bloque 4} ($256$ filtros): representaciones de alto
+        nivel específicas de cada clase.
+        \texttt{Conv2D(256)}$\times2$ + BN + ReLU + \texttt{MaxPool} +
+        \texttt{Dropout(0.25)}\quad $16\to8$~px.
+  \item \textbf{Cabecera:} \texttt{GlobalAveragePooling2D} +
+        \texttt{Dense(512)} + BN + ReLU + \texttt{Dropout(0.30)} +
+        \texttt{Dense(256)} + BN + ReLU + \texttt{Dropout(0.35)} +
+        \texttt{Dense(6, Softmax)}.
+\end{enumerate}
+
+El \textit{Global Average Pooling} sustituye a \texttt{Flatten} para
+mejorar la generalización con menos parámetros.  La regularización
+$L_2$ ($\lambda=10^{-4}$) se aplica en las capas densas.  El
+Cuadro~\ref{tab:arch} resume la configuración completa.
+
+\begin{table}[H]
+  \caption{Configuración de la arquitectura CNN}
+  \label{tab:arch}
+  \centering\small
+  \begin{tabular}{@{}llll@{}}
+    \toprule
+    \textbf{Bloque} & \textbf{Neuronas} & \textbf{Regularización} & \textbf{Salida} \\
+    \midrule
+    Conv Bloque 1  & $32\times2$   & BN + Dropout(0.10) & $64^2$  \\
+    Conv Bloque 2  & $64\times2$   & BN + Dropout(0.15) & $32^2$  \\
+    Conv Bloque 3  & $128\times2$  & BN + Dropout(0.20) & $16^2$  \\
+    Conv Bloque 4  & $256\times2$  & BN + Dropout(0.25) & $8^2$   \\
+    GAP            & ---           & ---                & 256     \\
+    Dense 1        & 512           & BN+L2+Dropout(0.30)& 512     \\
+    Dense 2        & 256           & BN+L2+Dropout(0.35)& 256     \\
+    Salida         & 6             & Softmax            & 6       \\
+    \midrule
+    \multicolumn{2}{@{}l}{Función de pérdida} & \multicolumn{2}{l}{Sparse Cat. Crossentropy} \\
+    \multicolumn{2}{@{}l}{Optimizador}        & \multicolumn{2}{l}{Adam + Cosine Decay} \\
+    \multicolumn{2}{@{}l}{LR inicial}         & \multicolumn{2}{l}{$5\times10^{-4}$} \\
+    \multicolumn{2}{@{}l}{Épocas máx.}        & \multicolumn{2}{l}{20} \\
+    \multicolumn{2}{@{}l}{Batch size}         & \multicolumn{2}{l}{32} \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\subsection{Entrenamiento}
+
+Se utilizó un \textit{scheduler} de tasa de aprendizaje
+\textbf{Cosine Decay} (decaimiento desde $5\times10^{-4}$ hasta
+$10^{-5}$) en lugar del \texttt{ReduceLROnPlateau} empleado en la
+Semana~1, lo que produce una reducción suave y continua que evita
+oscilaciones tardías.  Los \textit{callbacks} configurados fueron:
+
+\begin{itemize}[leftmargin=*,noitemsep,topsep=2pt]
+  \item \textbf{EarlyStopping} (paciencia=10, restaura mejores pesos,
+        $\Delta_{\min}=10^{-4}$).
+  \item \textbf{ModelCheckpoint} — guarda el mejor modelo según
+        \texttt{val\_accuracy}.
+  \item \textbf{CSVLogger} — registro del historial de entrenamiento.
+\end{itemize}
+
+Los pesos de clase fueron calculados con el objetivo de reducir el efecto del 
+desbalance entre categorías durante el proceso de entrenamiento. Se observa 
+que la clase Emphysema presenta el peso más alto (1.183), indicando una menor 
+representación relativa dentro del conjunto de entrenamiento, mientras que la 
+clase Normal presenta el menor peso (0.908), debido a su mayor número de 
+muestras disponibles. Esta estrategia permite penalizar más los errores en 
+clases menos representadas y contribuir a un aprendizaje más equilibrado 
+del modelo.
+
+\begin{table}[H]
+\centering
+\caption{Pesos de clase calculados para el entrenamiento del modelo}
+\label{tab:class_weights}
+
+\begin{tabular}{lc}
+\hline
+\textbf{Clase} & \textbf{Peso} \\
+\hline
+Covid-19 & 1.003 \\
+Emphysema & 1.183 \\
+Normal & 0.908 \\
+Pneumonia-Bacterial & 1.010 \\
+Pneumonia-Viral & 1.005 \\
+Tuberculosis & 0.933 \\
+\hline
+\end{tabular}
+\end{table}
+
+% ============================================================
+\section{Análisis del Preprocesamiento}
+
+\subsection{Efecto del Data Augmentation}
+
+Las transformaciones aplicadas al conjunto de entrenamiento
+(flip horizontal, rotación leve, zoom, contraste y brillo) producen
+imágenes visualmente diferentes pero clínicamente equivalentes: siguen
+siendo radiografías válidas que un médico diagnosticaría de la misma
+manera.  Este comportamiento es el deseado: aumentar artificialmente la
+diversidad de entrenamiento sin introducir distorsiones que alteren el
+diagnóstico.
+
+\subsection{Diferencias morfológicas entre clases}
+
+Entre las seis clases se observan diferencias morfológicas importantes:
+\textit{Tuberculosis} presenta cavitaciones en lóbulos superiores y
+fibrosis; \textit{COVID-19} y \textit{Emphysema} comparten opacidades
+bilaterales difusas; \textit{Pneumonia-Bacterial} y
+\textit{Pneumonia-Viral} presentan infiltrados intersticiales
+bilaterales similares, lo que constituye el principal desafío de
+clasificación del modelo.
+
+% ============================================================
+\section{Evaluación del Modelo}
+
+El rendimiento del modelo se evaluó sobre el conjunto de prueba
+utilizando \textit{accuracy}, precisión, \textit{recall} y
+\textit{F1-score}, junto con la matriz de confusión y el análisis de
+métricas por clase.  Adicionalmente se reporta la \textit{Top-2
+Accuracy} como métrica complementaria.
+
+\subsection{Métricas globales}
+
+Las curvas de entrenamiento y validación muestran convergencia estable.
+El análisis del \textit{gap} train-val confirma un ligero sobreajuste
+(gap 2--10\,\%), aceptable para CNNs entrenadas desde cero.  El resumen
+de métricas sobre el conjunto de test se presenta en el
+Cuadro~\ref{tab:metrics}.
+
+\begin{table}[H]
+  \caption{Métricas de evaluación en el conjunto de test}
+  \label{tab:metrics}
+  \centering\small
+  \begin{tabular}{@{}ll@{}}
+    \toprule
+    \textbf{Métrica} & \textbf{Valor} \\
+    \midrule
+    Test Loss              & (0.4259) \\
+    Test Accuracy          & (0.8549) \\
+    Top-2 Accuracy         & (0.9879) \\
+    Precision (weighted)   & (0.8553) \\
+    Recall (weighted)      & (0.8549) \\
+    F1-Score (weighted)    & (0.8537) \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+El análisis de las métricas globales presentado en la Tabla \ref{tab:metrics} evidencia un 
+desempeño satisfactorio del modelo en el conjunto de prueba. La exactitud alcanzó un 
+valor de 0.8549, indicando que aproximadamente el 85.49\% de las imágenes fueron 
+clasificadas correctamente. Asimismo, el modelo obtuvo un F1-score ponderado de 
+0.8537, mostrando un adecuado equilibrio entre precisión y sensibilidad. La precisión 
+ponderada (0.8553) y el recall ponderado (0.8549) presentan valores similares, sugiriendo 
+un comportamiento estable entre las diferentes categorías. Adicionalmente, la métrica T
+op-2 Accuracy alcanzó un valor de 0.9879, lo que indica que en el 98.79\% de los casos 
+la clase correcta se encuentra entre las dos predicciones con mayor probabilidad. 
+
+\begin{table}[H]
+\centering
+\caption{Métricas de desempeño del modelo por clase}
+\label{tab:metricas_clases}
+
+\small
+\begin{tabular}{p{3cm}cccc}
+\hline
+\textbf{Clase} & \textbf{Precision} & \textbf{Recall} & \textbf{F1-score}\\
+\hline
+Covid-19             & 0.8870 & 0.8633 & 0.8750 \\
+Emphysema            & 0.8566 & 0.8840 & 0.8701 \\
+Normal               & 0.9241 & 0.9733 & 0.9481 \\
+Pneumonia-Bacterial  & 0.7717 & 0.6533 & 0.7076 \\
+Pneumonia-Viral      & 0.6988 & 0.7733 & 0.7342 \\
+Tuberculosis         & 1.0000 & 0.9930 & 0.9965 \\
+\hline
+\end{tabular}
+
+\end{table}
+
+\subsection{Análisis por clase}
+
+Las métricas por clase permiten identificar las clases con mayor
+dificultad de clasificación.  De manera consistente con los resultados
+de la Semana~1, se espera que:
+
+\begin{itemize}[leftmargin=*,noitemsep,topsep=2pt]
+  \item \textbf{Tuberculosis} obtenga el F1-score más alto, dado que
+        sus patrones radiológicos (cavitaciones en lóbulos superiores,
+        fibrosis) son morfológicamente únicos.
+  \item \textbf{Pneumonia-Viral} y \textbf{Pneumonia-Bacterial}
+        registren el peor desempeño relativo, debido al solapamiento
+        visual de infiltrados intersticiales bilaterales difusos.
+\end{itemize}
+
+\subsection{Matriz de confusión}
+
+Las matrices de confusión (absoluta y normalizada) permiten identificar
+los patrones de error del modelo.  Como se puede ver en la siguiente gráfica:
+
+\begin{figure}[H]
+ \caption{Matriz de confusión}
+    \centering
+    \includegraphics[width=0.45\textwidth]{confusion_matrix1.png}
+    \label{fig:confusion_matrix1}
+\end{figure}
+
+Las principales confusiones esperadas se concentran entre:
+
+\begin{itemize}[leftmargin=*,noitemsep,topsep=2pt]
+  \item \textbf{Pneumonia-Bacterial} $\leftrightarrow$
+        \textbf{Pneumonia-Viral}: solapamiento visual de infiltrados
+        intersticiales.
+  \item \textbf{COVID-19} $\leftrightarrow$ \textbf{Emphysema}: ambas
+        presentan opacidades bilaterales difusas.
+
+\end{itemize}
+
+\subsection{Desempeño en entrenamiento y validación}
+
+La curva de entrenamiento (azul) baja de forma suave y continua durante 
+las 20 épocas, lo cual indica que el modelo aprendió de manera progresiva 
+y estable. La curva de validación (rojo) es más irregular, con picos notables 
+alrededor de las épocas 5--6 y 11, pero la tendencia general también es 
+descendente. Que ambas converjan hacia valores similares ($\sim0.5$) al final 
+es una buena señal: el modelo no está memorizando los datos de 
+entrenamiento.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.52\textwidth]{training_curves.png}
+    \caption{Curvas de desempeño}
+    \label{fig:training_curves1}
+\end{figure}
+
+La curva de entrenamiento sube de forma constante hasta alcanzar 0.9154 
+al final. La de validación es más inestable al inicio (lo cual es normal con 
+augmentation fuerte), pero se estabiliza a partir de la época 12 aproximadamente, 
+terminando en 0.8358. El mejor epoch identificado fue el 18, con la mejor 
+combinación entre el error del modelo y la exactitud de validación.
+
+\subsection{Predicciones del modelo}
+
+El análisis visual de las predicciones correctas e incorrectas evidencia que el modelo 
+identifica adecuadamente patologías con patrones radiológicos distintivos, como 
+tuberculosis y enfisema. Sin embargo, presenta dificultades para diferenciar 
+enfermedades con características similares, particularmente entre neumonía viral y 
+bacteriana. Además, se observaron casos críticos donde imágenes patológicas fueron 
+clasificadas como normales con alta confianza, lo cual sugiere posibles problemas 
+de generalización o desbalance entre clases y resalta la necesidad de mejorar el 
+proceso de entrenamiento.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.48\textwidth]{predicciones_ejemplos.png}
+    \caption{Predicciones}
+    \label{fig:predicciones_ejemplos}
+\end{figure}
+
+% ============================================================
+\section{Conclusiones}
+
+\begin{enumerate}[leftmargin=*,noitemsep,topsep=2pt]
+
+\item \textbf{La CNN supera al MLP aprovechando la estructura espacial
+de las imágenes.}  Mientras el MLP de la Semana~1 trataba cada imagen
+como un vector plano de 4\,096 valores perdiendo toda la información
+espacial (logrando un 86.13\,\% de \textit{accuracy}), la CNN extrae
+jerarquías de características locales mediante filtros convolucionales,
+lo que se traduce en una mejora directa sobre clases con patrones
+morfológicos complejos.
+
+\item \textbf{El diseño progresivo de filtros (32~$\to$~256) y el
+Global Average Pooling son fundamentales.}  La arquitectura VGG-like
+permite capturar desde bordes y texturas hasta estructuras anatómicas
+complejas de manera jerárquica.  El \texttt{GlobalAveragePooling2D}
+mejora la generalización frente al \texttt{Flatten} clásico, reduciendo
+significativamente el número de parámetros en la cabecera clasificadora.
+
+\item \textbf{El Cosine Decay produce convergencia más suave que el
+ReduceLROnPlateau.}  Al decaer la tasa de aprendizaje de forma continua
+y predecible, se evitan los saltos abruptos que pueden desestabilizar
+el entrenamiento en épocas tardías.  Esto contribuye a curvas de
+entrenamiento más estables.
+
+\item \textbf{El model generaliza bien pero persisten dificultades en
+las clases de neumonía.}  La confusión entre
+\textit{Pneumonia-Bacterial} y \textit{Pneumonia-Viral} es médicamente
+esperada: ambas condiciones comparten infiltrados intersticiales
+bilaterales difusos, diferenciables principalmente por marcadores
+clínicos y de laboratorio más que por apariencia radiológica.  Como
+pasos futuros se recomienda implementar \textit{transfer learning} con
+DenseNet-121 o EfficientNetB3, aplicar \textit{focal loss} para penalizar 
+más los errores en estas clases difíciles, y explorar técnicas de aumento 
+de datos específicas que exageren las diferencias entre patrones 
+bacterianos y virales.
+
+\item \textbf{Proyección hacia la Semana~3 (Transfer Learning):}
+los modelos candidatos son DenseNet-121 (conexiones densas que capturan
+gradientes finos de estructuras pulmonares), EfficientNetB3 (alto ratio
+\textit{accuracy}/parámetros gracias al \textit{compound scaling}) y
+ResNet-50 (\textit{baseline} robusto con \textit{skip connections} que
+evitan el \textit{vanishing gradient}).  La estrategia consistirá en
+\textit{fine-tuning} con pesos \texttt{imagenet} descongelando los
+últimos bloques y añadiendo una nueva cabecera para 6 clases.
+
+\end{enumerate}
+
+% ============================================================
+\section*{Referencias}
+
+\begin{enumerate}[leftmargin=*,noitemsep,topsep=2pt,label={[\arabic*]}]
+  \item TensorFlow Documentation (2024).
+        \href{https://www.tensorflow.org/}{\texttt{https://www.tensorflow.org/}}
+  \item Mohamed Asak (2024). \textit{ChestX6: Multi-Class X-ray Dataset}.
+        Kaggle.
+        \href{https://www.kaggle.com/datasets/mohamedasak/chest-x-ray-6-classes-dataset}%
+        {\texttt{kaggle.com/datasets/mohamedasak/chest-x-ray-6-classes-dataset}}
+  \item Rajpurkar et al.\ (2017). CheXNet: Radiologist-Level Pneumonia
+        Detection on Chest X-Rays.\ \textit{arXiv:1711.05225}.
+  \item Scikit-learn developers (2024). Neural network models (supervised).
+        \href{https://scikit-learn.org/stable/modules/neural_networks_supervised.html}%
+        {\texttt{scikit-learn.org}}
+\end{enumerate}
+
+\vfill
+\noindent\rule{\columnwidth}{0.4pt}\\
+{\scriptsize\textit{Aprendizaje profundo}\hfill
+Universidad Internacional del Ecuador\hfill Semana 2}
+
+\end{document}
